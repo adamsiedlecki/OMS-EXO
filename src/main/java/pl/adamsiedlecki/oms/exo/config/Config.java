@@ -24,7 +24,7 @@ public class Config {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule())
                 .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
-                .configure(JsonParser.Feature.IGNORE_UNDEFINED, true)
+                .configure(JsonParser.Feature.IGNORE_UNDEFINED, false)
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .findAndRegisterModules();
         return objectMapper;
