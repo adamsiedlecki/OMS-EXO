@@ -1,0 +1,66 @@
+swagger: "2.0"
+info:
+  description: "Service for OTM to import data from devices outside of central location."
+  version: "1.0.0"
+  title: "OtmApi"
+tags:
+  - name: "OTM"
+    externalDocs:
+      description: "Find out more"
+      url: "https://github.com/adamsiedlecki/OTM"
+schemes:
+  - "https"
+  - "http"
+paths:
+  /temperature:
+    post:
+      tags:
+        - "OTM"
+      summary: "Import temperature data into OTM"
+      operationId: "importTemperature"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "SendTemperatureInput"
+          description: Body of the temperature request
+          required: true
+          schema:
+            $ref: "#/definitions/SendTemperatureInput"
+      responses:
+        "200":
+          description: "OK"
+        "400":
+          description: "Bad request"
+        "500":
+          description: "Unexpected error inside OTM"
+        "502":
+          description: "Bad gateway, there is a problem with internet service."
+
+
+definitions:
+
+  SendTemperatureInput:
+    type: object
+    properties:
+      locationPlaceId:
+        type: integer
+        format: int64
+        required: true
+      town:
+        type: string
+      time:
+        type: integer
+        format: int64
+      stationMessage:
+        type: object
+        properties:
+          address:
+            type: integer
+            format: int64
+            required: true
+          temperature:
+            type: number
+            required: true
