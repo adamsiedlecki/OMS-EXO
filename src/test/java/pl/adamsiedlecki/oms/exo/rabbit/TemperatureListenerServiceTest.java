@@ -13,36 +13,54 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TemperatureListenerServiceTest {
 
-    private Config config;
     private OtmApiService otmApiService;
     private TemperatureListenerService sut;
 
     @BeforeEach
     void setUp() {
-        config = new Config();
         otmApiService = Mockito.mock(OtmApiService.class);
+        var config = new Config();
+
         sut = new TemperatureListenerService(config.objectMapper(), otmApiService);
     }
 
     @Test
-    void receiveTemperatureMessage() {
+    void shouldImportIntoOtmRabbitMessage() {
         // given
         String message = "{lpid:2,town:\"Skurów\",time:1659283210,stationMessage:{a:2,tp:16.49}}";
 
-        StationTemperatureMessage temperatureMessage = new StationTemperatureMessage();
-        temperatureMessage.setA(2);
-        temperatureMessage.setTp(16.49f);
+        StationTemperatureMessage temperatureMessage = new StationTemperatureMessage(2, 16.49f);
 
-        TemperatureMessage expectedMessage = new TemperatureMessage();
-        expectedMessage.setLpid(2);
-        expectedMessage.setTown("Skurów");
-        expectedMessage.setTime(1659283210);
-        expectedMessage.setStationMessage(temperatureMessage);
+        TemperatureMessage expectedMessage = new TemperatureMessage(2, "Skurów", 1659283210, temperatureMessage);
 
         // when
         sut.receiveTemperatureMessage(message);
 
         // then
         Mockito.verify(otmApiService).importIntoOtm(expectedMessage);
+    }
+
+    @Test
+    void shouldNotImportIntoOtmIncompleteData() {
+        // given
+        String message = "{lpid:2,town:\"Skurów\",time:1659283210,stationMessage:{a:2}}";
+
+        // when
+        sut.receiveTemperatureMessage(message);
+
+        // then
+        Mockito.verify(otmApiService, Mockito.times(0)).importIntoOtm(Mockito.any());
+    }
+
+    @Test
+    void shouldNotImportIntoOtmBadData() {
+        // given
+        String message = "{lpid:2,town:\"Skurów\",time:1659283210,stationMessage:{a:2,hu:99.99}}";
+
+        // when
+        sut.receiveTemperatureMessage(message);
+
+        // then
+        Mockito.verify(otmApiService, Mockito.times(0)).importIntoOtm(Mockito.any());
     }
 }

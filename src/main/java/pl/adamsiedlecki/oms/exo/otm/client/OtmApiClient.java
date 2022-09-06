@@ -1,9 +1,5 @@
 package pl.adamsiedlecki.oms.exo.otm.client;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import pl.adamsiedlecki.oms.exo.config.Config;

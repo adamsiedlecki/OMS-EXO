@@ -25,7 +25,7 @@ public class TemperatureListenerService {
             TemperatureMessage temperatureMessage = objectMapper.readValue(message, TemperatureMessage.class);
             otmApiService.importIntoOtm(temperatureMessage);
         } catch(Exception e) {
-            log.error("Error while processing rabbit message", e);
+            log.error("Error while processing rabbit message: {}", e.getMessage());
         }
     }
 }

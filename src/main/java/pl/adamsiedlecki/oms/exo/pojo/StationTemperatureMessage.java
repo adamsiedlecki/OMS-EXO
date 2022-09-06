@@ -1,15 +1,23 @@
 package pl.adamsiedlecki.oms.exo.pojo;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @EqualsAndHashCode
+@ToString
 public class StationTemperatureMessage {
+
+    @JsonCreator
+    public StationTemperatureMessage(long a, float tp) {
+        this.a = a;
+        this.tp = tp;
+    }
+
+    @JsonProperty(required = true)
     private long a;
+    @JsonProperty(required = true)
     private float tp;
 }
