@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:sch="http://adamsiedlecki.pl/ohm/soap" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://adamsiedlecki.pl/ohm" targetNamespace="http://adamsiedlecki.pl/ohm">
+  <wsdl:types>
+    <xs:schema xmlns:tns="http://adamsiedlecki.pl/ohm/soap" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://adamsiedlecki.pl/ohm/soap">
+
+    <xs:element name="ImportHumidityRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="locationPlaceId" type="xs:long"/>
+                <xs:element name="town" type="xs:string"/>
+                <xs:element name="time" type="xs:long"/>
+                <xs:element name="stationId" type="xs:long"/>
+                <xs:element name="humidity" type="xs:float"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="ImportHumidityResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="result" type="tns:result"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="result">
+        <xs:sequence>
+            <xs:element name="code" type="tns:responseCode"/>
+            <xs:element minOccurs="0" name="description" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:simpleType final="restriction" name="responseCode">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="SUCCESS"/>
+            <xs:enumeration value="ERROR"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>
+  </wsdl:types>
+  <wsdl:message name="ImportHumidityRequest">
+    <wsdl:part element="sch:ImportHumidityRequest" name="ImportHumidityRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="ImportHumidityResponse">
+    <wsdl:part element="sch:ImportHumidityResponse" name="ImportHumidityResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="HumidityPort">
+    <wsdl:operation name="ImportHumidity">
+      <wsdl:input message="tns:ImportHumidityRequest" name="ImportHumidityRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:ImportHumidityResponse" name="ImportHumidityResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="HumidityPortSoap11" type="tns:HumidityPort">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="ImportHumidity">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="ImportHumidityRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="ImportHumidityResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="HumidityPortService">
+    <wsdl:port binding="tns:HumidityPortSoap11" name="HumidityPortSoap11">
+      <soap:address location="http://10.0.0.20:8089/ws"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
