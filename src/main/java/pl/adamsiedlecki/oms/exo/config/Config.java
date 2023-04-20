@@ -16,7 +16,7 @@ import org.springframework.web.client.RestTemplate;
 @Setter
 public class Config {
 
-    @Value("${otm.address:http://10.0.0.20:8084/api/v1}")
+    @Value("${otm.address:http://otm-app:8084/api/v1}")
     private String otmAddress;
 
     @Bean
