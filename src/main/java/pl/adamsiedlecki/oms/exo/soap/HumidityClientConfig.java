@@ -16,7 +16,7 @@ public class HumidityClientConfig {
     @Bean
     public OhmSoapClient humidityClient(Jaxb2Marshaller marshaller) {
         var client = new OhmSoapClient();
-        client.setDefaultUri("http://10.0.0.20:8089/ws");
+        client.setDefaultUri("http://otm-app:8089/ws");
         client.setMarshaller(marshaller);
         client.setUnmarshaller(marshaller);
         return client;
