@@ -9,7 +9,7 @@ import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
 import pl.adamsiedlecki.oms.exo.config.EssaDevice;
-import pl.adamsiedlecki.oms.exo.pojo.Traceable;
+import pl.adamsiedlecki.oms.exo.pojo.TraceableInput;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -45,46 +45,32 @@ public class EssaController {
     @PostMapping(value = "/task", consumes = "application/json", produces = "application/json")
     public String essaResponse(@RequestParam int essaId,
                                @RequestBody String message,
-                               @RequestParam(defaultValue = "2000") int responseRabbitTimeoutMillis) {
-        log.info("essa{} - request: {}", essaId, message.replaceAll("\\s", ""));
+                               @RequestParam(defaultValue = "2000") int responseOnWebsocketMillis) {
+        log.info("essa request: {}", message.replaceAll("\\s", ""));
 
         try {
-            Traceable traceable = objectMapper.readValue(message, Traceable.class);
-            if (traceable.evId() == null || traceable.evId().isEmpty()) {
+            TraceableInput traceableInput = objectMapper.readValue(message, TraceableInput.class);
+            if (traceableInput.evId() == null || traceableInput.evId().isEmpty()) {
+                log.error("missing or blank evId in message!");
                 return "missing or blank evId in message!";
             }
+            log.info("Essa target: {}, eventId: {}", essaId, traceableInput.evId());
 
-            essaWebsocketsController.send(message);
+            essaWebsocketsController.send(message, "essa" + essaId);
             var start = LocalDateTime.now();
-            while (Duration.between(start, LocalDateTime.now()).toMillis() < responseRabbitTimeoutMillis) {
-                var response = essaWebsocketsController.getResponse(traceable.evId());
+            while (Duration.between(start, LocalDateTime.now()).toMillis() < responseOnWebsocketMillis) {
+                var response = essaWebsocketsController.getResponse(traceableInput.evId());
                 if (response != null) {
                     return response;
                 }
             }
         } catch (JsonProcessingException e) {
-            log.info("no evId in message! {}", e.getMessage());
-            return "no evId in message!";
+            String errorMessage = "Cannot convert message to Traceable: " + e.getMessage();
+            log.info(errorMessage);
+            return errorMessage;
         }
 
-
-
-
-//        synchronized (String.valueOf(essaId)) {
-//            Message oldMessageFromQueue;
-//            do {
-//                oldMessageFromQueue = rabbitTemplate.receive("responseFrom/essa" + essaId, 1);
-//            } while (oldMessageFromQueue != null);
-//            rabbitTemplate.send("amq.topic", "commandsFor.essa" + essaId, new Message(message.getBytes(StandardCharsets.UTF_8)));
-//            Message receive = rabbitTemplate.receive("responseFrom/essa" + essaId, responseRabbitTimeoutMillis);
-//            if (receive == null) {
-//                log.error("essa{} - no response on queue", essaId);
-//                return "{\"error\": \"No message on response queue within: " + responseRabbitTimeoutMillis + " millis\"}";
-//            }
-//            log.info("essa{} - response: {}", essaId, new String(receive.getBody()));
-//            return new String(receive.getBody());
-//        }
-        log.error("No response in desired time: {} millis", responseRabbitTimeoutMillis);
+        log.error("No response in desired time: {} millis", responseOnWebsocketMillis);
         return "No response in desired time";
     }
 }
