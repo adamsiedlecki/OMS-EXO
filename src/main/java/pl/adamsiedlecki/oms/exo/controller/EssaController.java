@@ -9,12 +9,18 @@ import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
 import pl.adamsiedlecki.oms.exo.config.EssaDevice;
+import pl.adamsiedlecki.oms.exo.pojo.EssaCompleteRequest;
+import pl.adamsiedlecki.oms.exo.pojo.LoraCompleteRequest;
 import pl.adamsiedlecki.oms.exo.pojo.TraceableInput;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Base64;
 import java.util.List;
+import java.util.Random;
 
 @Slf4j
 @RestController
@@ -60,6 +66,42 @@ public class EssaController {
             var start = LocalDateTime.now();
             while (Duration.between(start, LocalDateTime.now()).toMillis() < responseOnWebsocketMillis) {
                 var response = essaWebsocketsController.getResponse(traceableInput.evId());
+                if (response != null) {
+                    return response;
+                }
+            }
+            var error = essaWebsocketsController.getResponse("essa" + essaId + "-error");
+            if (error != null) {
+                log.info("Error message was found: " + error);
+                return error;
+            }
+        } catch (JsonProcessingException e) {
+            String errorMessage = "Cannot convert message to Traceable: " + e.getMessage();
+            log.info(errorMessage);
+            return errorMessage;
+        }
+
+        log.error("No response in desired time: {} millis", responseOnWebsocketMillis);
+        return "No response in desired time";
+    }
+
+    @PostMapping(value = "/lora/temperature/direct", produces = "application/json")
+    public String essaTemperatureDirect(@RequestParam int essaId,
+                               @RequestParam int stationId,
+                               @RequestParam(defaultValue = "2000") int responseOnWebsocketMillis) {
+        log.info("request to essa: {} for lora temperature  to station: {}", essaId, stationId);
+
+        try {
+            Random rand = new Random();
+            String seed = "" + rand.nextInt() + LocalTime.now();
+            String evId = Base64.getEncoder().encodeToString(seed.getBytes(StandardCharsets.UTF_8)).substring(0, 10);
+            EssaCompleteRequest essaCompleteRequest = new EssaCompleteRequest("lora", evId, 950,
+                    new LoraCompleteRequest("tR", ""+stationId, evId));
+
+            essaWebsocketsController.send(objectMapper.writeValueAsString(essaCompleteRequest), "essa" + essaId);
+            var start = LocalDateTime.now();
+            while (Duration.between(start, LocalDateTime.now()).toMillis() < responseOnWebsocketMillis) {
+                var response = essaWebsocketsController.getResponse(evId);
                 if (response != null) {
                     return response;
                 }
