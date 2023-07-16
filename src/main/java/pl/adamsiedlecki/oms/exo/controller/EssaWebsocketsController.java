@@ -39,7 +39,8 @@ public class EssaWebsocketsController {
             TraceableOutput traceableOutput = objectMapper.readValue(messageDecoded, TraceableOutput.class);
             map.put(traceableOutput.evId(), messageDecoded);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            log.error("Message from essa cannot be deserialized as json: {}", e.getMessage());
+            map.put(essaId+ "-error", messageDecoded);
         }
 
     }

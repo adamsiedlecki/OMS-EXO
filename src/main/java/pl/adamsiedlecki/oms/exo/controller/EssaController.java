@@ -64,6 +64,11 @@ public class EssaController {
                     return response;
                 }
             }
+            var error = essaWebsocketsController.getResponse("essa" + essaId + "-error");
+            if (error != null) {
+                log.info("Error message was found: " + error);
+                return error;
+            }
         } catch (JsonProcessingException e) {
             String errorMessage = "Cannot convert message to Traceable: " + e.getMessage();
             log.info(errorMessage);
