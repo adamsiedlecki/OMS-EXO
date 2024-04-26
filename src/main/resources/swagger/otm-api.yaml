@@ -12,7 +12,7 @@ schemes:
   - "https"
   - "http"
 paths:
-  /temperature:
+  /import/temperature:
     post:
       tags:
         - "OTM"
@@ -39,6 +39,31 @@ paths:
         "502":
           description: "Bad gateway, there is a problem with internet service."
 
+  /import/generic:
+    post:
+      tags:
+        - "OTM"
+      summary: "Import generic data into OTM"
+      operationId: "importGeneric"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "GenericImportInput"
+          description: Body of the generic request
+          required: true
+          schema:
+            $ref: "#/definitions/GenericImportInput"
+      responses:
+        "200":
+          description: "OK"
+        "400":
+          description: "Bad request"
+        "500":
+          description: "Unexpected error inside OTM"
+
 
 definitions:
 
@@ -64,3 +89,9 @@ definitions:
           temperature:
             type: number
             required: true
+
+  GenericImportInput:
+    type: object
+    properties:
+      data:
+        type: string # base64

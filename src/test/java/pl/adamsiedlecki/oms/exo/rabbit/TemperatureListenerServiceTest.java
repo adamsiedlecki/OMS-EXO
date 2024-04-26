@@ -1,6 +1,5 @@
 package pl.adamsiedlecki.oms.exo.rabbit;
 
-import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -8,8 +7,6 @@ import pl.adamsiedlecki.oms.exo.config.Config;
 import pl.adamsiedlecki.oms.exo.otm.client.OtmApiService;
 import pl.adamsiedlecki.oms.exo.pojo.StationTemperatureMessage;
 import pl.adamsiedlecki.oms.exo.pojo.TemperatureMessage;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class TemperatureListenerServiceTest {
 
@@ -37,7 +34,7 @@ class TemperatureListenerServiceTest {
         sut.receiveTemperatureMessage(message);
 
         // then
-        Mockito.verify(otmApiService).importIntoOtm(expectedMessage);
+        Mockito.verify(otmApiService).importTemperatureIntoOtm(expectedMessage);
     }
 
     @Test
@@ -49,7 +46,7 @@ class TemperatureListenerServiceTest {
         sut.receiveTemperatureMessage(message);
 
         // then
-        Mockito.verify(otmApiService, Mockito.times(0)).importIntoOtm(Mockito.any());
+        Mockito.verify(otmApiService, Mockito.times(0)).importTemperatureIntoOtm(Mockito.any());
     }
 
     @Test
@@ -61,6 +58,6 @@ class TemperatureListenerServiceTest {
         sut.receiveTemperatureMessage(message);
 
         // then
-        Mockito.verify(otmApiService, Mockito.times(0)).importIntoOtm(Mockito.any());
+        Mockito.verify(otmApiService, Mockito.times(0)).importTemperatureIntoOtm(Mockito.any());
     }
 }

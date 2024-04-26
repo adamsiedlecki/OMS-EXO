@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 import pl.adamsiedlecki.oms.exo.otm.client.OtmApiService;
 import pl.adamsiedlecki.oms.exo.pojo.TemperatureMessage;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -23,9 +26,10 @@ public class TemperatureListenerService {
         log.info("Received from rabbitmq: {}", message);
         try {
             TemperatureMessage temperatureMessage = objectMapper.readValue(message, TemperatureMessage.class);
-            otmApiService.importIntoOtm(temperatureMessage);
+            otmApiService.importTemperatureIntoOtm(temperatureMessage);
         } catch(Exception e) {
-            log.error("Error while processing rabbit message: {}", e.getMessage());
+            log.debug("This is not classic temperature message - importing as generic");
+            otmApiService.genericImportIntoOtm(Base64.getEncoder().encodeToString(message.getBytes(StandardCharsets.UTF_8)));
         }
     }
 }
